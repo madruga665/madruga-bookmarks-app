@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CreateNewFolder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -189,21 +191,33 @@ fun SaveBookmarkBottomSheet(
 
             NeobrutalistButton(
                 onClick = onConfirmSave,
+                enabled = !uiState.isSaving,
                 containerColor = NeobrutalismTheme.colors.accentYellow,
                 shape = RoundedCornerShape(14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 52.dp)
                     .testTag("tag_confirm_save_bookmark_btn")
             ) {
-                Text(
-                    text = buttonText,
-                    style = NeobrutalismTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    ),
-                    color = Color.Black,
-                    modifier = Modifier.padding(vertical = 4.dp)
-                )
+                if (uiState.isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .testTag("tag_save_bookmark_loading_spinner"),
+                        color = Color.Black,
+                        strokeWidth = 2.5.dp
+                    )
+                } else {
+                    Text(
+                        text = buttonText,
+                        style = NeobrutalismTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        ),
+                        color = Color.Black,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                }
             }
         }
     }

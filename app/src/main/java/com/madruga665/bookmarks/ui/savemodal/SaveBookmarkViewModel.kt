@@ -165,13 +165,12 @@ class SaveBookmarkViewModel @Inject constructor(
 
     fun onConfirmSave(onSuccess: () -> Unit) {
         val current = _uiState.value
-        val url = current.targetUrl
-        if (url.isBlank()) return
+        if (current.isSaving || current.targetUrl.isBlank()) return
 
+        _uiState.update { it.copy(isSaving = true) }
         viewModelScope.launch {
-            _uiState.update { it.copy(isSaving = true) }
             val success = bookmarkRepository.quickSaveBookmark(
-                url = url,
+                url = current.targetUrl,
                 collectionId = current.selectedCollectionId,
                 isPinned = current.isPinned,
                 tags = current.tags.toTagString()

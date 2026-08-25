@@ -58,6 +58,7 @@
     <string name="save_err_empty_name">O nome da pasta não pode ser vazio</string>
     <string name="save_err_create_failed">Falha ao criar pasta</string>
     <string name="save_err_save_failed">Falha ao salvar bookmark</string>
+    <string name="save_bookmark_saving">Salvando bookmark…</string>
 
     <!-- Collection Details -->
     <string name="collection_all_links_fmt">TODOS OS LINKS (%d)</string>

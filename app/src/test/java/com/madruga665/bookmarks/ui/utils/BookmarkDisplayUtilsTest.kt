@@ -42,6 +42,8 @@ class BookmarkDisplayUtilsTest {
         assertEquals("GitHub", BookmarkDisplayUtils.getSourceLabel("github", "https://github.com"))
         assertEquals("X / Twitter", BookmarkDisplayUtils.getSourceLabel("twitter", "https://twitter.com"))
         assertEquals("X / Twitter", BookmarkDisplayUtils.getSourceLabel("x", "https://x.com"))
+        assertEquals("Threads", BookmarkDisplayUtils.getSourceLabel("threads", "https://threads.net"))
+        assertEquals("Threads", BookmarkDisplayUtils.getSourceLabel("@Threads", "https://threads.net"))
     }
 
     @Test
@@ -50,6 +52,7 @@ class BookmarkDisplayUtilsTest {
         assertEquals("GitHub", BookmarkDisplayUtils.getSourceLabel(null, "https://github.com/torvalds"))
         assertEquals("YouTube", BookmarkDisplayUtils.getSourceLabel(null, "https://www.youtube.com/watch?v=abc"))
         assertEquals("Medium", BookmarkDisplayUtils.getSourceLabel(null, "https://medium.com/@user/story"))
+        assertEquals("Threads", BookmarkDisplayUtils.getSourceLabel(null, "https://www.threads.net/@zuck"))
     }
 
     @Test
@@ -62,6 +65,9 @@ class BookmarkDisplayUtilsTest {
         val result = BookmarkDisplayUtils.getFaviconUrl(null, "https://github.com/repo")
         assertNotNull(result)
         assertTrue(result!!.contains("google.com/s2/favicons?domain=github.com"))
+
+        val resultThreads = BookmarkDisplayUtils.getFaviconUrl(null, "https://www.threads.net/@zuck")
+        assertEquals("https://www.threads.net/favicon.ico", resultThreads)
     }
 
     @Test

@@ -58,6 +58,7 @@
     <string name="save_err_empty_name">Folder name cannot be empty</string>
     <string name="save_err_create_failed">Failed to create folder</string>
     <string name="save_err_save_failed">Failed to save bookmark</string>
+    <string name="save_bookmark_saving">Saving bookmark…</string>
 
     <!-- Collection Details -->
     <string name="collection_all_links_fmt">ALL LINKS (%d)</string>
