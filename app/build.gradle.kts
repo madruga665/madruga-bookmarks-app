@@ -86,6 +86,7 @@ dependencies {
 
     // Image loading & Link metadata extraction
     implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-svg:2.7.0")
     implementation("org.jsoup:jsoup:1.23.1")
 
     // Testing

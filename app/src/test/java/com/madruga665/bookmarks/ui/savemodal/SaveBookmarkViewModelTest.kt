@@ -6,11 +6,13 @@ import com.madruga665.bookmarks.data.repository.CollectionRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -257,6 +259,80 @@ class SaveBookmarkViewModelTest {
     fun onConfirmSave_blankUrl_doesNotTriggerSave() {
         viewModel.onConfirmSave {}
         coVerify(exactly = 0) { bookmarkRepository.quickSaveBookmark(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun onConfirmSave_setsIsSavingTrueDuringExecution() = runTest {
+        val deferred = CompletableDeferred<Boolean>()
+        coEvery {
+            bookmarkRepository.quickSaveBookmark(
+                url = "https://kotlinlang.org",
+                collectionId = any(),
+                isPinned = any(),
+                tags = any()
+            )
+        } coAnswers {
+            deferred.await()
+        }
+
+        viewModel.openSaveModal("https://kotlinlang.org")
+
+        var callbackCalled = false
+        viewModel.onConfirmSave {
+            callbackCalled = true
+        }
+
+        // Verify isSaving is true and modal is still visible while in-flight
+        assertTrue(viewModel.uiState.value.isSaving)
+        assertTrue(viewModel.uiState.value.isVisible)
+        assertFalse(callbackCalled)
+
+        // Complete the in-flight save operation
+        deferred.complete(true)
+        testScheduler.advanceUntilIdle()
+
+        // Verify state transitions to isSaving = false and isVisible = false on completion
+        assertFalse(viewModel.uiState.value.isSaving)
+        assertFalse(viewModel.uiState.value.isVisible)
+        assertNull(viewModel.uiState.value.error)
+        assertTrue(callbackCalled)
+    }
+
+    @Test
+    fun onConfirmSave_whileSaving_ignoresDuplicateInvocation() = runTest {
+        val deferred = CompletableDeferred<Boolean>()
+        coEvery {
+            bookmarkRepository.quickSaveBookmark(
+                url = "https://kotlinlang.org",
+                collectionId = any(),
+                isPinned = any(),
+                tags = any()
+            )
+        } coAnswers {
+            deferred.await()
+        }
+
+        viewModel.openSaveModal("https://kotlinlang.org")
+
+        var firstCallbackCalled = false
+        var secondCallbackCalled = false
+
+        viewModel.onConfirmSave { firstCallbackCalled = true }
+        assertTrue(viewModel.uiState.value.isSaving)
+
+        // Duplicate invocation while saving is in progress
+        viewModel.onConfirmSave { secondCallbackCalled = true }
+
+        // Only one save call should be dispatched
+        coVerify(exactly = 1) {
+            bookmarkRepository.quickSaveBookmark(any(), any(), any(), any())
+        }
+
+        deferred.complete(true)
+        testScheduler.advanceUntilIdle()
+
+        assertTrue(firstCallbackCalled)
+        assertFalse(secondCallbackCalled)
     }
 
     // ---- Tag-related tests (T008) ----

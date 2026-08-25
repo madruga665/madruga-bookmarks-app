@@ -44,6 +44,9 @@ object LinkMetadataExtractor {
             domain.contains("twitter.com") || domain.contains("x.com") -> {
                 extractTwitterMetadata(cleanUrl, domain)
             }
+            domain.contains("threads.net") || domain.contains("threads") -> {
+                extractThreadsMetadata(cleanUrl, domain)
+            }
             domain.contains("instagram.com") -> {
                 extractInstagramMetadata(cleanUrl)
             }
@@ -162,7 +165,70 @@ object LinkMetadataExtractor {
     }
 
     // ==========================================
-    // 2. Instagram Extraction
+    // 2. Threads Extraction
+    // ==========================================
+    private suspend fun extractThreadsMetadata(url: String, domain: String): LinkMetadata = withContext(Dispatchers.IO) {
+        val defaultFavicon = "https://www.threads.net/favicon.ico"
+        val fallbackThumbnail = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80"
+
+        val uri = try { URI(url) } catch (e: Exception) { null }
+        val pathParts = uri?.path?.split("/")?.filter { it.isNotBlank() } ?: emptyList()
+
+        val rawUsername = pathParts.firstOrNull { it.startsWith("@") }
+            ?: pathParts.firstOrNull()?.takeIf { it != "t" && it != "post" && !it.startsWith("?") }
+        val username = rawUsername?.removePrefix("@")
+
+        val postIndex = pathParts.indexOfFirst { it == "post" || it == "t" }
+        val postId = if (postIndex != -1 && postIndex + 1 < pathParts.size) {
+            pathParts[postIndex + 1]
+        } else null
+
+        // Strategy A: Social bot OpenGraph scraping
+        val scraped = extractGenericMetadata(url, domain, userAgent = BOT_USER_AGENT)
+        val isLoginWall = scraped.title?.let { t ->
+            t.contains("log in", ignoreCase = true) ||
+            t.contains("sign up", ignoreCase = true) ||
+            t.contains("entrar", ignoreCase = true) ||
+            t.contains("cadastrar", ignoreCase = true) ||
+            t.contains("login", ignoreCase = true)
+        } == true
+
+        val isGenericTitle = scraped.title == null ||
+            scraped.title.isBlank() ||
+            scraped.title.equals("@Threads", ignoreCase = true) ||
+            scraped.title.equals("Threads", ignoreCase = true)
+
+        val resolvedFavicon = scraped.faviconUrl?.takeIf {
+            it.isNotBlank() && !it.contains("google.com/s2")
+        } ?: defaultFavicon
+
+        if (!isLoginWall && !isGenericTitle && !scraped.title.isNullOrBlank()) {
+            LinkMetadata(
+                title = scraped.title,
+                faviconUrl = resolvedFavicon,
+                thumbnailUrl = scraped.thumbnailUrl ?: fallbackThumbnail,
+                sourcePlatform = "@Threads",
+                description = scraped.description
+            )
+        } else {
+            // Strategy B (Fallback)
+            val fallbackTitle = when {
+                !username.isNullOrBlank() -> "@$username on Threads"
+                postId != null || pathParts.contains("t") -> "Threads Post"
+                else -> "Threads"
+            }
+            LinkMetadata(
+                title = fallbackTitle,
+                faviconUrl = defaultFavicon,
+                thumbnailUrl = fallbackThumbnail,
+                sourcePlatform = "@Threads",
+                description = null
+            )
+        }
+    }
+
+    // ==========================================
+    // 3. Instagram Extraction
     // ==========================================
     private suspend fun extractInstagramMetadata(url: String): LinkMetadata = withContext(Dispatchers.IO) {
         val defaultFavicon = "https://www.google.com/s2/favicons?domain=instagram.com&sz=128"
@@ -491,6 +557,7 @@ object LinkMetadataExtractor {
         val clean = domain.removePrefix("www.").lowercase()
         return when {
             clean.contains("instagram") -> "@Instagram"
+            clean.contains("threads.net") || clean.contains("threads") -> "@Threads"
             clean.contains("linkedin") -> "@LinkedIn"
             clean.contains("twitter") || clean.contains("x.com") -> "@X"
             clean.contains("youtube") || clean.contains("youtu.be") -> "@YouTube"

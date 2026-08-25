@@ -27,6 +27,7 @@ object BookmarkDisplayUtils {
             if (clean.equals("linkedin", ignoreCase = true)) return "LinkedIn"
             if (clean.equals("youtube", ignoreCase = true)) return "YouTube"
             if (clean.equals("twitter", ignoreCase = true) || clean.equals("x", ignoreCase = true)) return "X / Twitter"
+            if (clean.equals("threads", ignoreCase = true)) return "Threads"
             return clean.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         }
 
@@ -34,6 +35,7 @@ object BookmarkDisplayUtils {
             val uri = URI(url)
             val host = uri.host?.removePrefix("www.") ?: ""
             when {
+                host.contains("threads.net", ignoreCase = true) || host.contains("threads.com", ignoreCase = true) -> "Threads"
                 host.contains("instagram.com", ignoreCase = true) -> "Instagram"
                 host.contains("linkedin.com", ignoreCase = true) -> "LinkedIn"
                 host.contains("github.com", ignoreCase = true) -> "GitHub"
@@ -52,6 +54,9 @@ object BookmarkDisplayUtils {
         return try {
             val uri = URI(url)
             val host = uri.host?.removePrefix("www.") ?: return null
+            if (host.contains("threads.net", ignoreCase = true) || host.contains("threads.com", ignoreCase = true)) {
+                return "https://www.threads.net/favicon.ico"
+            }
             "https://www.google.com/s2/favicons?domain=$host&sz=128"
         } catch (e: Exception) {
             null
@@ -65,6 +70,12 @@ object BookmarkDisplayUtils {
             val pathParts = uri.path?.split("/")?.filter { it.isNotBlank() } ?: emptyList()
 
             when {
+                host.contains("threads.net", ignoreCase = true) || host.contains("threads.com", ignoreCase = true) -> {
+                    val rawUsername = pathParts.firstOrNull { it.startsWith("@") }
+                        ?: pathParts.firstOrNull()?.takeIf { it != "t" && it != "post" && !it.startsWith("?") }
+                    val username = rawUsername?.removePrefix("@")
+                    if (username != null) "@$username on Threads" else "Threads Post"
+                }
                 host.contains("instagram.com", ignoreCase = true) -> {
                     val username = pathParts.firstOrNull { it != "p" && it != "reel" } ?: "devemdobro"
                     "${username.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }} | Programação on Instagram"
@@ -94,6 +105,8 @@ object BookmarkDisplayUtils {
         }
 
         return when {
+            cleanHost.contains("threads.net", ignoreCase = true) || cleanHost.contains("threads.com", ignoreCase = true) ->
+                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80"
             cleanHost.contains("instagram.com", ignoreCase = true) ->
                 "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop&q=80"
             cleanHost.contains("github.com", ignoreCase = true) ->
