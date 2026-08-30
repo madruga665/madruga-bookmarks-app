@@ -65,6 +65,7 @@ fun HomeScreen(
     onConfirmDeleteCollection: (collectionId: String) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
+    onNavigateToSyncSettings: () -> Unit = {},
     onNavigateToManageCollections: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
@@ -89,7 +90,9 @@ fun HomeScreen(
         ) {
             // Top Action Bar
             HomeScreenTopBar(
+                syncStatus = successState?.syncStatus ?: com.madruga665.bookmarks.data.repository.SyncStatus.IDLE,
                 onNavigateToSettings = onNavigateToSettings,
+                onNavigateToSyncSettings = onNavigateToSyncSettings,
                 onNavigateToManageCollections = {
                     isCreateCollectionOpen = true
                 },

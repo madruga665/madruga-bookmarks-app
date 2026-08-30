@@ -17,11 +17,13 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
+import com.madruga665.bookmarks.data.remote.sync.PeerDiscoveryManager
 import com.madruga665.bookmarks.data.repository.AppLanguage
 import com.madruga665.bookmarks.data.repository.AppThemeMode
 import com.madruga665.bookmarks.data.repository.BookmarkRepository
 import com.madruga665.bookmarks.data.repository.CollectionRepository
 import com.madruga665.bookmarks.data.repository.SettingsRepository
+import com.madruga665.bookmarks.data.repository.SyncRepository
 import com.madruga665.bookmarks.ui.home.HomeViewModel
 import com.madruga665.bookmarks.ui.navigation.BookmarksNavGraph
 import com.madruga665.bookmarks.ui.savemodal.SaveBookmarkViewModel
@@ -44,6 +46,12 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var settingsRepository: SettingsRepository
+
+    @Inject
+    lateinit var syncRepository: SyncRepository
+
+    @Inject
+    lateinit var peerDiscoveryManager: PeerDiscoveryManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,7 +106,9 @@ class MainActivity : ComponentActivity() {
                         saveBookmarkViewModel = saveBookmarkViewModel,
                         collectionRepository = collectionRepository,
                         bookmarkRepository = bookmarkRepository,
-                        settingsRepository = settingsRepository
+                        settingsRepository = settingsRepository,
+                        syncRepository = syncRepository,
+                        peerDiscoveryManager = peerDiscoveryManager
                     )
                 }
             }

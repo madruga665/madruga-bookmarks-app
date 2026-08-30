@@ -68,4 +68,104 @@ class CollectionRepositoryTest {
         val entity = repository.createCollection(longName, "#FFE600", "folder")
         org.junit.Assert.assertNull(entity)
     }
+
+    @Test
+    fun deleteCollection_performsSoftDeleteOnBookmarksAndCollection() = runTest {
+        io.mockk.coEvery { bookmarkDao.softDeleteBookmarksByCollectionId(any(), any()) } returns Unit
+        io.mockk.coEvery { collectionDao.softDeleteCollectionById(any(), any()) } returns Unit
+        val repository = CollectionRepository(collectionDao, bookmarkDao)
+
+        repository.deleteCollection("col-to-delete")
+
+        io.mockk.coVerify {
+            bookmarkDao.softDeleteBookmarksByCollectionId("col-to-delete", any())
+            collectionDao.softDeleteCollectionById("col-to-delete", any())
+        }
+    }
+
+    @Test
+    fun getModifiedCollectionsSince_delegatesToDao() = runTest {
+        val sampleList = listOf(
+            com.madruga665.bookmarks.data.local.CollectionEntity(
+                id = "col-mod",
+                name = "Modified",
+                linkCount = 1,
+                iconKey = "folder",
+                colorAccent = "YELLOW",
+                createdAt = 100L,
+                updatedAt = 500L,
+                isDeleted = false
+            )
+        )
+        io.mockk.coEvery { collectionDao.getCollectionsModifiedSince(200L) } returns sampleList
+        val repository = CollectionRepository(collectionDao, bookmarkDao)
+
+        val result = repository.getModifiedCollectionsSince(200L)
+        assertEquals(1, result.size)
+        assertEquals("col-mod", result[0].id)
+    }
+
+    @Test
+    fun upsertCollectionFromSync_insertsWhenNotPresent() = runTest {
+        io.mockk.coEvery { collectionDao.getCollectionByIdDirect("col-sync-new") } returns null
+        io.mockk.coEvery { collectionDao.insertCollection(any()) } returns Unit
+        val repository = CollectionRepository(collectionDao, bookmarkDao)
+
+        val incoming = com.madruga665.bookmarks.data.local.CollectionEntity(
+            id = "col-sync-new",
+            name = "Synced Col",
+            linkCount = 0,
+            iconKey = "star",
+            colorAccent = "BLUE",
+            createdAt = 100L,
+            updatedAt = 300L,
+            isDeleted = false
+        )
+
+        repository.upsertCollectionFromSync(incoming)
+        io.mockk.coVerify(exactly = 1) { collectionDao.insertCollection(incoming) }
+    }
+
+    @Test
+    fun upsertCollectionFromSync_overwritesWhenIncomingIsNewer() = runTest {
+        val local = com.madruga665.bookmarks.data.local.CollectionEntity(
+            id = "col-sync-existing",
+            name = "Local Name",
+            linkCount = 0,
+            iconKey = "folder",
+            colorAccent = "YELLOW",
+            createdAt = 100L,
+            updatedAt = 200L,
+            isDeleted = false
+        )
+        val incoming = local.copy(name = "Remote Name", updatedAt = 300L)
+
+        io.mockk.coEvery { collectionDao.getCollectionByIdDirect("col-sync-existing") } returns local
+        io.mockk.coEvery { collectionDao.insertCollection(any()) } returns Unit
+        val repository = CollectionRepository(collectionDao, bookmarkDao)
+
+        repository.upsertCollectionFromSync(incoming)
+        io.mockk.coVerify(exactly = 1) { collectionDao.insertCollection(incoming) }
+    }
+
+    @Test
+    fun upsertCollectionFromSync_doesNotOverwriteWhenIncomingIsOlderOrEqual() = runTest {
+        val local = com.madruga665.bookmarks.data.local.CollectionEntity(
+            id = "col-sync-existing",
+            name = "Local Name",
+            linkCount = 0,
+            iconKey = "folder",
+            colorAccent = "YELLOW",
+            createdAt = 100L,
+            updatedAt = 500L,
+            isDeleted = false
+        )
+        val olderIncoming = local.copy(name = "Old Remote Name", updatedAt = 400L)
+
+        io.mockk.coEvery { collectionDao.getCollectionByIdDirect("col-sync-existing") } returns local
+        val repository = CollectionRepository(collectionDao, bookmarkDao)
+
+        repository.upsertCollectionFromSync(olderIncoming)
+        io.mockk.coVerify(exactly = 0) { collectionDao.insertCollection(any()) }
+    }
 }

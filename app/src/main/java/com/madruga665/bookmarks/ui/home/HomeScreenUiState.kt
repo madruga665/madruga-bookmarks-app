@@ -13,6 +13,7 @@ sealed interface HomeScreenUiState {
         val quickSaveUrlInput: String = "",
         val inputError: String? = null,
         val isSaving: Boolean = false,
+        val syncStatus: com.madruga665.bookmarks.data.repository.SyncStatus = com.madruga665.bookmarks.data.repository.SyncStatus.IDLE,
         val activeMenuCollection: CollectionEntity? = null,
         val activeCardOffset: Offset? = null,
         val activeCardSize: IntSize? = null,
