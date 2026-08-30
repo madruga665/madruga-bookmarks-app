@@ -114,3 +114,4 @@ Execute all Gradle commands from the project root:
 5. **Quality Gate & Review (`/code-reviewer`)**:
    - Always run `./gradlew testDebugUnitTest` to verify zero regressions.
    - Run dual-axis code review: **Standards Axis** (DDD, SOLID, Clean Architecture, Fowler smells) + **Spec Axis** (Constitution & Spec compliance).
+   - **CI Monitoring & Investigation**: Always monitor and report the remote CI workflow results after push (`gh run list`, `gh run watch`). If any CI failure or issue occurs, immediately investigate the root cause (using a subagent) and resolve it.
