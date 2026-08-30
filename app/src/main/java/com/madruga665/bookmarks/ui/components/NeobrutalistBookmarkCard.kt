@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,45 +93,28 @@ fun NeobrutalistBookmarkCard(
         label = "cardScale"
     )
 
+    val currentOnClick by rememberUpdatedState(onClick)
+    val currentOnLongPressStart by rememberUpdatedState(onLongPressStart)
+    val currentOnLongPressDrag by rememberUpdatedState(onLongPressDrag)
+    val currentOnLongPressRelease by rememberUpdatedState(onLongPressRelease)
+
     val gestureModifier = if (onLongPressStart != null) {
         Modifier.pointerInput(bookmark.id) {
-            awaitEachGesture {
-                val down = awaitFirstDown(requireUnconsumed = false)
-                val downTime = System.currentTimeMillis()
-                var isLongPressActive = false
-                val pointerId = down.id
-
-                while (true) {
-                    val event = awaitPointerEvent()
-                    val change = event.changes.firstOrNull { it.id == pointerId }
-
-                    if (change == null || !change.pressed) {
-                        if (isLongPressActive) {
-                            onLongPressRelease?.invoke()
-                        } else {
-                            val duration = System.currentTimeMillis() - downTime
-                            if (duration < 350) {
-                                onClick()
-                            }
-                        }
-                        break
-                    }
-
-                    val elapsed = System.currentTimeMillis() - downTime
-                    if (!isLongPressActive && elapsed >= 350) {
-                        isLongPressActive = true
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        val touchInWindow = cardWindowOffset + change.position
-                        onLongPressStart(bookmark, touchInWindow, cardWindowOffset, cardSize)
-                    }
-
-                    if (isLongPressActive) {
-                        change.consume()
-                        val touchInWindow = cardWindowOffset + change.position
-                        onLongPressDrag?.invoke(touchInWindow)
-                    }
+            detectTapAndLongPressDrag(
+                onTap = { currentOnClick() },
+                onLongPressStart = { localOffset ->
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    val touchInWindow = cardWindowOffset + localOffset
+                    currentOnLongPressStart?.invoke(bookmark, touchInWindow, cardWindowOffset, cardSize)
+                },
+                onLongPressDrag = { localOffset ->
+                    val touchInWindow = cardWindowOffset + localOffset
+                    currentOnLongPressDrag?.invoke(touchInWindow)
+                },
+                onLongPressRelease = {
+                    currentOnLongPressRelease?.invoke()
                 }
-            }
+            )
         }
     } else if (onLongClick != null) {
         Modifier.combinedClickable(
