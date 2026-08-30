@@ -31,9 +31,10 @@ fun NeobrutalistTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholderText: String,
-    onPasteClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPasteClick: (() -> Unit)? = null
 ) {
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -86,18 +87,21 @@ fun NeobrutalistTextField(
             }
 
             // Clipboard Paste Icon Button
-            IconButton(
-                onClick = onPasteClick,
-                modifier = Modifier
-                    .size(24.dp)
-                    .testTag("tag_quick_save_paste_btn")
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ContentPaste,
-                    contentDescription = stringResource(R.string.paste_from_clipboard),
-                    tint = NeobrutalismTheme.colors.onSurface
-                )
+            if (onPasteClick != null) {
+                IconButton(
+                    onClick = onPasteClick,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .testTag("tag_quick_save_paste_btn")
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ContentPaste,
+                        contentDescription = stringResource(R.string.paste_from_clipboard),
+                        tint = NeobrutalismTheme.colors.onSurface
+                    )
+                }
             }
         }
     }
 }
+

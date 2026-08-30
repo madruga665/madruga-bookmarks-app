@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.madruga665.bookmarks.data.repository.BookmarkRepository
 import com.madruga665.bookmarks.data.repository.CollectionRepository
+import com.madruga665.bookmarks.data.repository.SyncRepository
+import com.madruga665.bookmarks.data.repository.SyncStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,24 +17,40 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val collectionRepository: CollectionRepository,
-    private val bookmarkRepository: BookmarkRepository
+    private val bookmarkRepository: BookmarkRepository,
+    private val syncRepository: SyncRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeScreenUiState>(HomeScreenUiState.Loading)
     val uiState: StateFlow<HomeScreenUiState> = _uiState.asStateFlow()
 
+    val syncStatus: StateFlow<SyncStatus> = syncRepository.syncStatus
+
     init {
         loadCollections()
+        observeSyncStatus()
     }
 
     fun loadCollections() {
         viewModelScope.launch {
             collectionRepository.collections.collectLatest { list ->
                 val current = _uiState.value
+                val currentSyncStatus = syncRepository.syncStatus.value
                 if (current is HomeScreenUiState.Success) {
-                    _uiState.value = current.copy(collections = list)
+                    _uiState.value = current.copy(collections = list, syncStatus = currentSyncStatus)
                 } else {
-                    _uiState.value = HomeScreenUiState.Success(collections = list)
+                    _uiState.value = HomeScreenUiState.Success(collections = list, syncStatus = currentSyncStatus)
+                }
+            }
+        }
+    }
+
+    private fun observeSyncStatus() {
+        viewModelScope.launch {
+            syncRepository.syncStatus.collectLatest { status ->
+                val current = _uiState.value
+                if (current is HomeScreenUiState.Success) {
+                    _uiState.value = current.copy(syncStatus = status)
                 }
             }
         }

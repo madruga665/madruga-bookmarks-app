@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "BookmarksPeerSyncProtocol",
+  "description": "Peer-to-peer local Wi-Fi synchronization contract between Desktop Plasmoid and Android Mobile App",
+  "version": "1.0.0",
+  "endpoints": {
+    "discoveryBeacon": {
+      "transport": "UDP_BROADCAST",
+      "defaultPort": 43888,
+      "payload": {
+        "type": "object",
+        "required": ["protocol", "deviceId", "deviceName", "httpPort", "deviceType"],
+        "properties": {
+          "protocol": { "type": "string", "enum": ["bookmarks-sync-v1"] },
+          "deviceId": { "type": "string", "format": "uuid" },
+          "deviceName": { "type": "string" },
+          "httpPort": { "type": "integer", "default": 43889 },
+          "deviceType": { "type": "string", "enum": ["desktop", "mobile"] }
+        }
+      }
+    },
+    "pairHandshake": {
+      "method": "POST",
+      "path": "/api/v1/sync/pair",
+      "request": {
+        "type": "object",
+        "required": ["initiatorDeviceId", "initiatorName", "verificationCode"],
+        "properties": {
+          "initiatorDeviceId": { "type": "string" },
+          "initiatorName": { "type": "string" },
+          "verificationCode": { "type": "string" }
+        }
+      },
+      "response": {
+        "type": "object",
+        "required": ["status", "authToken", "responderDeviceId", "responderName"],
+        "properties": {
+          "status": { "type": "string", "enum": ["PAIRED_SUCCESS", "INVALID_CODE", "REJECTED"] },
+          "authToken": { "type": "string" },
+          "responderDeviceId": { "type": "string" },
+          "responderName": { "type": "string" }
+        }
+      }
+    },
+    "bidirectionalExchange": {
+      "method": "POST",
+      "path": "/api/v1/sync/exchange",
+      "headers": {
+        "Authorization": "Bearer <authToken>",
+        "Content-Type": "application/json"
+      },
+      "request": {
+        "type": "object",
+        "required": ["deviceId", "lastSyncTimestamp", "collections", "bookmarks"],
+        "properties": {
+          "deviceId": { "type": "string" },
+          "lastSyncTimestamp": { "type": "integer" },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "name", "colorAccent", "iconKey", "createdAt", "updatedAt", "isDeleted"],
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "parentId": { "type": ["string", "null"] },
+                "colorAccent": { "type": "string" },
+                "iconKey": { "type": "string" },
+                "createdAt": { "type": "integer" },
+                "updatedAt": { "type": "integer" },
+                "isDeleted": { "type": "boolean" }
+              }
+            }
+          },
+          "bookmarks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "url", "collectionId", "createdAt", "updatedAt", "isDeleted"],
+              "properties": {
+                "id": { "type": "string" },
+                "url": { "type": "string", "format": "uri" },
+                "title": { "type": ["string", "null"] },
+                "description": { "type": ["string", "null"] },
+                "faviconUrl": { "type": ["string", "null"] },
+                "thumbnailUrl": { "type": ["string", "null"] },
+                "sourcePlatform": { "type": ["string", "null"] },
+                "collectionId": { "type": "string" },
+                "notes": { "type": ["string", "null"] },
+                "tags": { "type": "string" },
+                "isPinned": { "type": "boolean" },
+                "createdAt": { "type": "integer" },
+                "updatedAt": { "type": "integer" },
+                "isDeleted": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      },
+      "response": {
+        "type": "object",
+        "required": ["status", "serverTimestamp", "collections", "bookmarks"],
+        "properties": {
+          "status": { "type": "string", "enum": ["SUCCESS", "AUTH_ERROR", "CONFLICT_RETRY"] },
+          "serverTimestamp": { "type": "integer" },
+          "collections": { "type": "array" },
+          "bookmarks": { "type": "array" }
+        }
+      }
+    }
+  }
+}

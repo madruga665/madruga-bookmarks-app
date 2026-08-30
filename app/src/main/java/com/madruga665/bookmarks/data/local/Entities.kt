@@ -14,7 +14,8 @@ data class CollectionEntity(
     @ColumnInfo(name = "icon_key") val iconKey: String,
     @ColumnInfo(name = "color_accent") val colorAccent: String,
     @ColumnInfo(name = "created_at") val createdAt: Long,
-    @ColumnInfo(name = "updated_at") val updatedAt: Long
+    @ColumnInfo(name = "updated_at") val updatedAt: Long,
+    @ColumnInfo(name = "is_deleted") val isDeleted: Boolean = false
 )
 
 @Entity(tableName = "bookmarks_table")
@@ -32,5 +33,17 @@ data class BookmarkEntity(
     @ColumnInfo(name = "is_pinned") val isPinned: Boolean = false,
     @ColumnInfo(name = "created_at") val createdAt: Long,
     @ColumnInfo(name = "updated_at") val updatedAt: Long = System.currentTimeMillis(),
-    @ColumnInfo(name = "sync_status") val syncStatus: String = "PENDING_SYNC"
+    @ColumnInfo(name = "sync_status") val syncStatus: String = "PENDING_SYNC",
+    @ColumnInfo(name = "is_deleted") val isDeleted: Boolean = false
+)
+
+@Entity(tableName = "paired_devices_table")
+data class PairedDeviceEntity(
+    @PrimaryKey @ColumnInfo(name = "device_id") val deviceId: String,
+    @ColumnInfo(name = "device_name") val deviceName: String,
+    @ColumnInfo(name = "host_address") val hostAddress: String,
+    @ColumnInfo(name = "http_port") val httpPort: Int = 43889,
+    @ColumnInfo(name = "auth_token") val authToken: String,
+    @ColumnInfo(name = "last_sync_timestamp") val lastSyncTimestamp: Long = 0L,
+    @ColumnInfo(name = "is_paired") val isPaired: Boolean = true
 )

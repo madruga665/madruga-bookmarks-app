@@ -211,4 +211,31 @@
     <string name="tag_max_limit_warning">Limite máximo de 10 tags atingido</string>
     <string name="tag_empty_warning">A tag não pode ser vazia</string>
     <string name="tag_suggestion_label">SUGESTÕES</string>
+
+    <!-- Desktop Sync -->
+    <string name="sync_title">Sincronização com KDE Desktop</string>
+    <string name="sync_description">Sincronize bookmarks e coleções via Wi-Fi local com o KDE Plasmoid</string>
+    <string name="sync_status_synced">Sincronizado</string>
+    <string name="sync_status_syncing">Sincronizando...</string>
+    <string name="sync_status_disconnected">Desconectado</string>
+    <string name="sync_status_error">Erro</string>
+    <string name="sync_status_idle">Inativo</string>
+    <string name="sync_action_sync_now">Sincronizar Agora</string>
+    <string name="sync_action_pair">Parear Dispositivo</string>
+    <string name="sync_action_unpair">Desparear</string>
+    <string name="sync_verification_code_title">Código de Verificação</string>
+    <string name="sync_searching_devices">Procurando dispositivos desktop...</string>
+    <string name="sync_discovered_devices_heading">Dispositivos Encontrados</string>
+    <string name="sync_paired_devices_heading">Dispositivos Pareados</string>
+    <string name="sync_no_devices_found">Nenhum dispositivo encontrado no Wi-Fi</string>
+    <string name="sync_pair_dialog_description">Insira o código de 6 dígitos exibido no seu KDE Desktop Plasmoid</string>
+    <string name="sync_last_synced_fmt">Última sincronização: %s</string>
+    <string name="sync_last_synced_never">Nunca sincronizado</string>
+    <string name="sync_pair_confirm">Confirmar Pareamento</string>
+    <string name="sync_ip_port_fmt">%1$s:%2$d</string>
+    <string name="sync_pref_title">Sincronização KDE</string>
+    <string name="sync_pref_desc">Sincronizar com o widget do computador</string>
+    <string name="sync_empty_discovered_hint">Certifique-se de que o Plasmoid KDE esteja rodando no mesmo Wi-Fi</string>
+    <string name="sync_empty_paired_hint">Nenhum computador pareado ainda</string>
+    <string name="sync_action_scan">Buscar Dispositivos</string>
 </resources>

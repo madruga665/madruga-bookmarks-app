@@ -5,6 +5,8 @@ import androidx.room.Room
 import com.madruga665.bookmarks.data.local.AppDatabase
 import com.madruga665.bookmarks.data.local.BookmarkDao
 import com.madruga665.bookmarks.data.local.CollectionDao
+import com.madruga665.bookmarks.data.local.MIGRATION_4_5
+import com.madruga665.bookmarks.data.local.PairedDeviceDao
 import com.madruga665.bookmarks.data.repository.BookmarkRepository
 import com.madruga665.bookmarks.data.repository.CollectionRepository
 import com.madruga665.bookmarks.data.repository.SettingsRepository
@@ -27,7 +29,10 @@ object AppModule {
             context,
             AppDatabase::class.java,
             "bookmarks_db"
-        ).fallbackToDestructiveMigration(dropAllTables = true).build()
+        )
+            .addMigrations(MIGRATION_4_5)
+            .fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
     }
 
     @Provides
@@ -35,6 +40,9 @@ object AppModule {
 
     @Provides
     fun provideBookmarkDao(db: AppDatabase): BookmarkDao = db.bookmarkDao()
+
+    @Provides
+    fun providePairedDeviceDao(db: AppDatabase): PairedDeviceDao = db.pairedDeviceDao()
 
     @Provides
     @Singleton

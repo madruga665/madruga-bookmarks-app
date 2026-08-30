@@ -36,6 +36,10 @@ import com.madruga665.bookmarks.ui.savemodal.SaveBookmarkBottomSheet
 import com.madruga665.bookmarks.ui.savemodal.SaveBookmarkViewModel
 import com.madruga665.bookmarks.ui.search.SearchScreen
 import com.madruga665.bookmarks.ui.search.SearchViewModel
+import com.madruga665.bookmarks.data.remote.sync.PeerDiscoveryManager
+import com.madruga665.bookmarks.data.repository.SyncRepository
+import com.madruga665.bookmarks.ui.settings.sync.SyncSettingsScreen
+import com.madruga665.bookmarks.ui.settings.sync.SyncSettingsViewModel
 import com.madruga665.bookmarks.ui.settings.SettingsScreen
 import com.madruga665.bookmarks.ui.settings.SettingsViewModel
 import com.madruga665.bookmarks.ui.theme.NeobrutalismTheme
@@ -45,6 +49,7 @@ object NavRoutes {
     const val HOME = "home"
     const val SEARCH = "search"
     const val SETTINGS = "settings"
+    const val SYNC_SETTINGS = "sync_settings"
     const val MANAGE_COLLECTIONS = "manage_collections"
     const val FOLDER_DETAIL = "folder_detail/{folderId}"
     const val BOOKMARK_DETAIL = "bookmark_detail/{bookmarkId}"
@@ -60,6 +65,8 @@ fun BookmarksNavGraph(
     collectionRepository: CollectionRepository,
     bookmarkRepository: BookmarkRepository,
     settingsRepository: SettingsRepository,
+    syncRepository: SyncRepository? = null,
+    peerDiscoveryManager: PeerDiscoveryManager? = null,
     navController: NavHostController = rememberNavController()
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
@@ -103,6 +110,9 @@ fun BookmarksNavGraph(
                 },
                 onNavigateToSettings = {
                     navController.navigate(NavRoutes.SETTINGS)
+                },
+                onNavigateToSyncSettings = {
+                    navController.navigate(NavRoutes.SYNC_SETTINGS)
                 },
                 onNavigateToManageCollections = {
                     navController.navigate(NavRoutes.MANAGE_COLLECTIONS)
@@ -175,6 +185,9 @@ fun BookmarksNavGraph(
                 onThemeSelect = settingsViewModel::setThemeMode,
                 onLanguageSelect = settingsViewModel::setLanguage,
                 onToggleHapticFeedback = settingsViewModel::toggleHapticFeedback,
+                onNavigateToSyncSettings = {
+                    navController.navigate(NavRoutes.SYNC_SETTINGS)
+                },
                 onExportBackupClick = {
                     Toast.makeText(context, R.string.toast_exporting_backup, Toast.LENGTH_SHORT).show()
                 },
@@ -186,6 +199,37 @@ fun BookmarksNavGraph(
                 }
             )
         }
+
+        composable(NavRoutes.SYNC_SETTINGS) {
+            val syncViewModel: SyncSettingsViewModel = if (syncRepository != null && peerDiscoveryManager != null) {
+                remember {
+                    SyncSettingsViewModel(
+                        syncRepository = syncRepository,
+                        peerDiscoveryManager = peerDiscoveryManager
+                    )
+                }
+            } else {
+                androidx.hilt.navigation.compose.hiltViewModel()
+            }
+            val syncUiState by syncViewModel.uiState.collectAsState()
+
+            SyncSettingsScreen(
+                uiState = syncUiState,
+                onBackClick = { navController.popBackStack() },
+                onInitiatePairing = syncViewModel::initiatePairing,
+                onVerificationCodeChange = syncViewModel::onVerificationCodeChange,
+                onConfirmPairing = { syncViewModel.confirmPairing() },
+                onDismissPairingDialog = syncViewModel::dismissPairingDialog,
+                onSyncNow = syncViewModel::triggerManualSync,
+                onSyncDevice = syncViewModel::syncWithDevice,
+                onUnpairDevice = syncViewModel::unpairDevice,
+                onRefreshDiscovery = syncViewModel::startDiscovery,
+                onManualHostChange = syncViewModel::onManualHostChange,
+                onManualPortChange = syncViewModel::onManualPortChange,
+                onPairManualHost = { syncViewModel.pairWithManualHost() }
+            )
+        }
+
 
         composable(NavRoutes.MANAGE_COLLECTIONS) {
             PlaceholderDestination(title = "Manage Collections Screen")

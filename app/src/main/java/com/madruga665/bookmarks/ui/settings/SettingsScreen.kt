@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.DesktopWindows
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.MoveToInbox
@@ -60,6 +61,7 @@ fun SettingsScreen(
     onLanguageSelect: (AppLanguage) -> Unit,
     onToggleHapticFeedback: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToSyncSettings: () -> Unit = {},
     onExportBackupClick: () -> Unit = {},
     onRestoreBackupClick: () -> Unit = {},
     onImportBookmarksClick: () -> Unit = {}
@@ -151,6 +153,19 @@ fun SettingsScreen(
                     isEnabled = uiState.isHapticFeedbackEnabled,
                     onToggle = onToggleHapticFeedback,
                     testTag = "tag_preference_haptic"
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                PreferenceItemCard(
+                    title = stringResource(R.string.sync_pref_title),
+                    subtitle = stringResource(R.string.sync_pref_desc),
+                    valueText = "",
+                    icon = Icons.Outlined.DesktopWindows,
+                    iconBackground = NeobrutalismTheme.colors.accentPurple,
+                    iconTint = Color.White,
+                    onClick = onNavigateToSyncSettings,
+                    testTag = "tag_preference_sync"
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))

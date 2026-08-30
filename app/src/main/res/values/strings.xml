@@ -211,4 +211,31 @@
     <string name="tag_max_limit_warning">Maximum of 10 tags reached</string>
     <string name="tag_empty_warning">Tag cannot be empty</string>
     <string name="tag_suggestion_label">SUGGESTIONS</string>
+
+    <!-- Desktop Sync -->
+    <string name="sync_title">KDE Desktop Sync</string>
+    <string name="sync_description">Synchronize bookmarks and collections over local Wi-Fi with KDE Plasmoid</string>
+    <string name="sync_status_synced">Synced</string>
+    <string name="sync_status_syncing">Syncing...</string>
+    <string name="sync_status_disconnected">Disconnected</string>
+    <string name="sync_status_error">Error</string>
+    <string name="sync_status_idle">Idle</string>
+    <string name="sync_action_sync_now">Sync Now</string>
+    <string name="sync_action_pair">Pair Device</string>
+    <string name="sync_action_unpair">Unpair</string>
+    <string name="sync_verification_code_title">Verification Code</string>
+    <string name="sync_searching_devices">Searching for desktop devices...</string>
+    <string name="sync_discovered_devices_heading">Discovered Devices</string>
+    <string name="sync_paired_devices_heading">Paired Devices</string>
+    <string name="sync_no_devices_found">No devices found on Wi-Fi</string>
+    <string name="sync_pair_dialog_description">Enter the 6-digit code shown on your KDE Desktop Plasmoid</string>
+    <string name="sync_last_synced_fmt">Last synced: %s</string>
+    <string name="sync_last_synced_never">Never synced</string>
+    <string name="sync_pair_confirm">Confirm Pair</string>
+    <string name="sync_ip_port_fmt">%1$s:%2$d</string>
+    <string name="sync_pref_title">KDE Desktop Sync</string>
+    <string name="sync_pref_desc">Sync with companion desktop widget</string>
+    <string name="sync_empty_discovered_hint">Ensure KDE Plasmoid is running on the same Wi-Fi</string>
+    <string name="sync_empty_paired_hint">No paired desktop companions yet</string>
+    <string name="sync_action_scan">Scan for Devices</string>
 </resources>

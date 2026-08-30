@@ -88,7 +88,18 @@ class BookmarkRepository(
     }
 
     suspend fun deleteBookmark(bookmarkId: String) = withContext(Dispatchers.IO) {
-        bookmarkDao.deleteBookmarkById(bookmarkId)
+        bookmarkDao.softDeleteBookmarkById(bookmarkId, System.currentTimeMillis())
+    }
+
+    suspend fun getModifiedBookmarksSince(sinceTimestamp: Long): List<BookmarkEntity> = withContext(Dispatchers.IO) {
+        bookmarkDao.getBookmarksModifiedSince(sinceTimestamp)
+    }
+
+    suspend fun upsertBookmarkFromSync(bookmark: BookmarkEntity) = withContext(Dispatchers.IO) {
+        val existing = bookmarkDao.getBookmarkByIdDirectIncludingDeleted(bookmark.id)
+        if (existing == null || bookmark.updatedAt > existing.updatedAt) {
+            bookmarkDao.insertBookmark(bookmark)
+        }
     }
 
     suspend fun refreshMetadata(bookmarkId: String): Boolean = withContext(Dispatchers.IO) {

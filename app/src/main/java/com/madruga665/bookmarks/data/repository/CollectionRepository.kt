@@ -74,8 +74,20 @@ class CollectionRepository(
     }
 
     suspend fun deleteCollection(collectionId: String) {
-        bookmarkDao.deleteBookmarksByCollectionId(collectionId)
-        collectionDao.deleteCollectionById(collectionId)
+        val now = System.currentTimeMillis()
+        bookmarkDao.softDeleteBookmarksByCollectionId(collectionId, now)
+        collectionDao.softDeleteCollectionById(collectionId, now)
+    }
+
+    suspend fun getModifiedCollectionsSince(sinceTimestamp: Long): List<CollectionEntity> {
+        return collectionDao.getCollectionsModifiedSince(sinceTimestamp)
+    }
+
+    suspend fun upsertCollectionFromSync(collection: CollectionEntity) {
+        val existing = collectionDao.getCollectionByIdDirect(collection.id)
+        if (existing == null || collection.updatedAt > existing.updatedAt) {
+            collectionDao.insertCollection(collection)
+        }
     }
 
     private fun defaultCollections(): List<CollectionEntity> = listOf(
